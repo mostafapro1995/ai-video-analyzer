@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>تحدثي معي</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* ---- ألوان وتخطيط عام ---- */
+    :root{
+      --bg: #0f1117;
+      --panel: #131416;
+      --accent: #39a66b;
+      --btn: #2aa67a;
+      --text: #e7e7e7;
+      --bubble-user: #2a7ade;
+      --bubble-bot: #2e2e2e;
+      --muted: #9aa0a6;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    header{
+      background:var(--accent);
+      color:#fff;
+      padding:18px 20px;
+      font-weight:700;
+      text-align:center;
+      font-size:1.4rem;
+      box-shadow:0 2px 6px rgba(0,0,0,.25);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+    }
+    header .logo{font-size:1.1rem}
+
+    /* ---- منطقة الشات ---- */
+    #chat {
+      flex:1;
+      padding:18px;
+      overflow-y:auto;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height: calc(100vh - 170px);
+    }
+    .container{
+      display:flex;
+      flex-direction:column;
+      height:calc(100vh - 72px);
+    }
+    .message{
+      max-width:85%;
+      padding:12px 14px;
+      border-radius:14px;
+      line-height:1.6;
+      white-space:pre-wrap;
+      box-shadow:0 2px 6px rgba(0,0,0,.4);
+      font-size:1rem;
+    }
+    .user{align-self:flex-end;background:var(--bubble-user); color:#fff}
+    .assistant{align-self:flex-start;background:var(--bubble-bot); color:var(--text)}
+    .text{white-space:pre-wrap}
+    .message img, .message video, .message audio { max-width:100%; border-radius:8px; display:block; margin-top:8px }
+
+    /* ---- شريط الإدخال ---- */
+    #input-area{
+      background:#0b0c0d;
+      padding:12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      border-top:1px solid rgba(255,255,255,.03);
+      box-shadow:0 -6px 20px rgba(0,0,0,.6);
+    }
+    #input{
+      flex:1;
+      padding:12px 14px;
+      border-radius:10px;
+      border:none;
+      outline:none;
+      background:#121316;
+      color:var(--text);
+      font-size:1rem;
+    }
+    .btn{
+      background:var(--btn);
+      color:#fff;
+      border:none;
+      padding:10px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:600;
+    }
+    .file-label{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      padding:8px 10px;
+      border-radius:8px;
+      background:var(--btn);
+      color:#fff;
+      font-weight:600;
+    }
+    .file-label input{display:none}
+
+    /* ===== Loader أنيميشن ===== */
+    .loader {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+      height: 24px;
+      padding-top: 6px;
+    }
+    .loader-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #39a66b;
+      border-radius: 50%;
+      animation: loaderBounce 0.6s infinite ease-in-out;
+    }
+    .loader-dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    .loader-dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+    @keyframes loaderBounce {
+      0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="logo">تحدثي معي</span>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <div class="container">
+    <div id="chat" aria-live="polite"></div>
+
+    <!-- شريط الإدخال -->
+    <div id="input-area">
+      <input id="input" type="text" placeholder="اكتب رسالتك هنا..." />
+      <button id="send" class="btn"><i class="fa-solid fa-paper-plane"></i>&nbsp;إرسال</button>
+
+      <label class="file-label" title="صورة">
+        <i class="fa-solid fa-image"></i>&nbsp;<span>صورة</span>
+        <input id="uploadImage" type="file" accept="image/*" />
+      </label>
+
+      <label class="file-label" title="فيديو">
+        <i class="fa-solid fa-film"></i>&nbsp;<span>فيديو</span>
+        <input id="uploadVideo" type="file" accept="video/*" />
+      </label>
+
+      <label class="file-label" title="صوت">
+        <i class="fa-solid fa-wave-square"></i>&nbsp;<span>صوت</span>
+        <input id="uploadAudio" type="file" accept="audio/*" />
+      </label>
+<label class="file-label" title="مشاركة الشاشة">
+  <i class="fa-solid fa-desktop"></i>&nbsp;<span>مشاركة الشاشة</span>
+  <input id="shareScreen" type="button" />
+</label>
+
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
