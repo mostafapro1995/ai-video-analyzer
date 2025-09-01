@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const stopLoader = attachLoader(assistMsg);
 
     try {
-      const response = await fetch("http://localhost:3000/chat", {
+      const response = await fetch("https://ai-video-analyzer-4mmd.onrender.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append(type, file);
 
     try {
-      const res = await fetch(`http://localhost:3000/upload-${type}`, {
+      const res = await fetch(`https://ai-video-analyzer-4mmd.onrender.com/upload-${type}`, {
         method: "POST",
         body: formData,
       });
