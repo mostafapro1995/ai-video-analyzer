@@ -21,7 +21,12 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// شغّل السيرفر على البورت الصحيح
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 const FRAMES_DIR = path.join(__dirname, 'frames');
 for (const d of [UPLOAD_DIR, FRAMES_DIR]) {
