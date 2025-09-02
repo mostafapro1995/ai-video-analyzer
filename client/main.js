@@ -70,6 +70,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+// === دالة خاصة برفع الفيديو ومعالجته ===
+async function uploadVideo(file, prompt = "") {
+  if (!file) return;
+
+  // عرض الفيديو في الشات مرة واحدة فقط
+  addMessage("user", `<video src="${URL.createObjectURL(file)}" controls></video>`, true);
+
+  const assistMsg = addMessage("assistant", "");
+  const stopLoader = attachLoader(assistMsg);
+
+  const formData = new FormData();
+  formData.append("video", file);
+  formData.append("prompt", prompt);
+
+  try {
+    const res = await fetch(`${API_URL}/upload-video`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    stopLoader();
+
+    if (res.ok && data.ok) {
+      // عرض رد التحليل فقط بدون إعادة عرض الفيديو
+      addMessage("assistant", data.response);
+      conversationHistory.push({ role: "assistant", content: data.response });
+    } else {
+      addMessage("assistant", `⚠️ خطأ: ${data.error || "تعذر معالجة الفيديو."}`);
+    }
+  } catch (error) {
+    stopLoader();
+    addMessage("assistant", "⚠️ فشل رفع الفيديو. تأكد من تشغيل السيرفر.");
+  }
+}
+
+  
   // === دالة لرفع الملفات (صور / فيديو / صوت) ===
   async function uploadFile(file, type) {
     if (!file) return;
@@ -149,7 +186,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   uploadImage.addEventListener("change", (e) => uploadFile(e.target.files[0], "image"));
-  uploadVideo.addEventListener("change", (e) => uploadFile(e.target.files[0], "video"));
+  uploadVideo.addEventListener("change", (e) => uploadVideo(e.target.files[0]));
+  //uploadVideo.addEventListener("change", (e) => uploadFile(e.target.files[0], "video"));
   uploadAudio.addEventListener("change", (e) => uploadFile(e.target.files[0], "audio"));
 
 // زر مشاركة الشاشة
