@@ -3,15 +3,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputField = document.getElementById("input");
   const sendButton = document.getElementById("send");
   const uploadImage = document.getElementById("uploadImage");
-  const videoInput  = document.getElementById("uploadVideo");
+  const videoInput = document.getElementById("uploadVideo");
   const uploadAudio = document.getElementById("uploadAudio");
   const screenShareBtn = document.getElementById("shareScreen");
- const API_URL = "https://ai-video-analyzer-4mmd.onrender.com";
+  const API_URL = "https://ai-video-analyzer-4mmd.onrender.com";
 
-  // === المصفوفة لحفظ سياق المحادثة ===
   let conversationHistory = [];
 
-  // === دالة إضافة الرسائل للشات ===
   function addMessage(sender, text, isHTML = false) {
     const msg = document.createElement("div");
     msg.className = `message ${sender}`;
@@ -21,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return msg;
   }
 
-  // === دالة لإضافة Loader متحرك ===
   function attachLoader(msgEl) {
     const loaderHTML = `
       <div class="loader-bubble">
@@ -31,12 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
     msgEl.innerHTML = loaderHTML;
-    return () => {
-      msgEl.remove(); // إزالة الفقاعة بالكامل عند الانتهاء
-    };
+    return () => msgEl.remove();
   }
 
-  // === دالة إرسال الرسائل النصية ===
   async function sendMessage() {
     const message = inputField.value.trim();
     if (!message) return;
@@ -57,17 +51,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await response.json();
       stopLoader();
-if (response.ok && data.ok && typeof data.response === "string") {
-  addMessage("assistant", data.response);
-  conversationHistory.push({ role: "assistant", content: data.response });
-} else {
-  addMessage("assistant", `⚠️ خطأ: ${data.error || "تعذر معالجة الفيديو."}`);
-}
-//      if (response.ok && data.ok) {
-//       addMessage("assistant", data.response);
-//      conversationHistory.push({ role: "assistant", content: data.response });
-//    } else {
-//     addMessage("assistant", `⚠️ خطأ: ${data.error || "فشل الاتصال بالسيرفر."}`);
+
+      if (response.ok && data.ok && typeof data.response === "string") {
+        addMessage("assistant", data.response);
+        conversationHistory.push({ role: "assistant", content: data.response });
+      } else {
+        addMessage("assistant", `⚠️ خطأ: ${data.error || "تعذر معالجة الفيديو."}`);
       }
     } catch (error) {
       stopLoader();
@@ -75,48 +64,42 @@ if (response.ok && data.ok && typeof data.response === "string") {
     }
   }
 
-// === دالة خاصة برفع الفيديو ومعالجته ===
-async function processVideo(file, prompt = "") {
-  if (!file) return;
+  async function processVideo(file, prompt = "") {
+    if (!file) return;
 
-  // عرض الفيديو في الشات مرة واحدة فقط
-  addMessage("user", `<video src="${URL.createObjectURL(file)}" controls></video>`, true);
+    addMessage("user", `<video src="${URL.createObjectURL(file)}" controls></video>`, true);
 
-  const assistMsg = addMessage("assistant", "");
-  const stopLoader = attachLoader(assistMsg);
+    const assistMsg = addMessage("assistant", "");
+    const stopLoader = attachLoader(assistMsg);
 
-  const formData = new FormData();
-  formData.append("video", file);
-  formData.append("prompt", prompt);
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("prompt", prompt);
 
-  try {
-    const res = await fetch(`${API_URL}/upload-video`, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch(`${API_URL}/upload-video`, {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json();
-    stopLoader();
+      const data = await res.json();
+      stopLoader();
 
-    if (res.ok && data.ok) {
-      // عرض رد التحليل فقط بدون إعادة عرض الفيديو
-      addMessage("assistant", data.response);
-      conversationHistory.push({ role: "assistant", content: data.response });
-    } else {
-      addMessage("assistant", `⚠️ خطأ: ${data.error || "تعذر معالجة الفيديو."}`);
+      if (res.ok && data.ok && data.response) {
+        addMessage("assistant", data.response);
+        conversationHistory.push({ role: "assistant", content: data.response });
+      } else {
+        addMessage("assistant", `⚠️ خطأ: ${data.error || "تعذر معالجة الفيديو."}`);
+      }
+    } catch (error) {
+      stopLoader();
+      addMessage("assistant", "⚠️ فشل رفع الفيديو. تأكد من تشغيل السيرفر.");
     }
-  } catch (error) {
-    stopLoader();
-    addMessage("assistant", "⚠️ فشل رفع الفيديو. تأكد من تشغيل السيرفر.");
   }
-}
 
-  
-  // === دالة لرفع الملفات (صور / فيديو / صوت) ===
   async function uploadFile(file, type) {
     if (!file) return;
 
-    // عرض الملف في الشات مرة واحدة فقط
     if (type === "image") {
       addMessage("user", `<img src="${URL.createObjectURL(file)}" alt="صورة" />`, true);
     } else if (type === "video") {
@@ -140,8 +123,7 @@ async function processVideo(file, prompt = "") {
       const data = await res.json();
       stopLoader();
 
-      if (res.ok && data.ok) {
-        // إضافة نص الرد فقط بدون إعادة عرض الفيديو أو الصورة أو الصوت
+      if (res.ok && data.ok && data.response) {
         addMessage("assistant", data.response);
         conversationHistory.push({ role: "assistant", content: data.response });
       } else {
@@ -153,7 +135,6 @@ async function processVideo(file, prompt = "") {
     }
   }
 
-  // === دالة تسجيل الشاشة وإرسال الفيديو للسيرفر ===
   async function startScreenRecording() {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -171,9 +152,6 @@ async function processVideo(file, prompt = "") {
       recorder.onstop = async () => {
         const blob = new Blob(chunks, { type: "video/webm" });
         const file = new File([blob], "screen-recording.webm", { type: "video/webm" });
-
-
-        // نرفع الفيديو للسيرفر لمعالجته بدون تكرار الفيديو في الرد
         await uploadFile(file, "video");
       };
 
@@ -184,17 +162,14 @@ async function processVideo(file, prompt = "") {
     }
   }
 
-  // === ربط الأحداث ===
   sendButton.addEventListener("click", sendMessage);
   inputField.addEventListener("keypress", (e) => {
     if (e.key === "Enter") sendMessage();
   });
 
   uploadImage.addEventListener("change", (e) => uploadFile(e.target.files[0], "image"));
-  uploadVideo.addEventListener("change", (e) => processVideo(e.target.files[0]));
-  //uploadVideo.addEventListener("change", (e) => uploadFile(e.target.files[0], "video"));
+  videoInput.addEventListener("change", (e) => processVideo(e.target.files[0]));
   uploadAudio.addEventListener("change", (e) => uploadFile(e.target.files[0], "audio"));
 
-// زر مشاركة الشاشة
-screenShareBtn.addEventListener("click", startScreenRecording);
+  screenShareBtn.addEventListener("click", startScreenRecording);
 });
