@@ -23,6 +23,11 @@ app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// فحص حالة السيرفر
+app.get('/health', (_req, res) => {
+  res.json({ ok: true, hasOpenAI: !!process.env.OPENAI_API_KEY, hasAssemblyAI: !!aaiKey });
+});
+
 // شغّل السيرفر على البورت الصحيح
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
@@ -420,12 +425,4 @@ ${transcript}
   }
 });
 
-// فحص حالة السيرفر
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, hasOpenAI: !!process.env.OPENAI_API_KEY, hasAssemblyAI: !!aaiKey });
-});
 
-// تشغيل السيرفر
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-});
