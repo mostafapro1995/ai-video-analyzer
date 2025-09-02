@@ -309,7 +309,11 @@ app.post('/upload-video', upload.single('video'), async (req, res) => {
   }
 
   const taskId = Date.now().toString();
-  res.json({ ok: true, processing: true, taskId }); // نرد فورًا
+
+	//res.json({ ok: true, processing: true, taskId }); // نرد فورًا
+	
+	    // رجع الرد النهائي للواجهة مباشرة
+	return res.json({ok: true, response: botResponse, extra: {frames, transcript,frames_meta: framesMeta,duration,audio: audioDetails} });
 
   // نبدأ المعالجة في الخلفية
   (async () => {
