@@ -1,10 +1,10 @@
 {
-  "name": "chatgpt-server",
+  "name": "ai-video-analyzer",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "server/server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server/server.js"
   },
   "dependencies": {
     "axios": "^1.11.0",
