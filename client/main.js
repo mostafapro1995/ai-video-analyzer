@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 // === دالة خاصة برفع الفيديو ومعالجته ===
-async function uploadVideo(file, prompt = "") {
+async function processVideo(file, prompt = "") {
   if (!file) return;
 
   // عرض الفيديو في الشات مرة واحدة فقط
@@ -186,7 +186,7 @@ async function uploadVideo(file, prompt = "") {
   });
 
   uploadImage.addEventListener("change", (e) => uploadFile(e.target.files[0], "image"));
-  uploadVideo.addEventListener("change", (e) => uploadVideo(e.target.files[0]));
+  uploadVideo.addEventListener("change", (e) => processVideo(e.target.files[0]));
   //uploadVideo.addEventListener("change", (e) => uploadFile(e.target.files[0], "video"));
   uploadAudio.addEventListener("change", (e) => uploadFile(e.target.files[0], "audio"));
 
