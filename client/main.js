@@ -57,12 +57,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await response.json();
       stopLoader();
-
-      if (response.ok && data.ok) {
-        addMessage("assistant", data.response);
-        conversationHistory.push({ role: "assistant", content: data.response });
-      } else {
-        addMessage("assistant", `⚠️ خطأ: ${data.error || "فشل الاتصال بالسيرفر."}`);
+if (response.ok && data.ok && typeof data.response === "string") {
+  addMessage("assistant", data.response);
+  conversationHistory.push({ role: "assistant", content: data.response });
+} else {
+  addMessage("assistant", `⚠️ خطأ: ${data.error || "تعذر معالجة الفيديو."}`);
+}
+//      if (response.ok && data.ok) {
+//       addMessage("assistant", data.response);
+//      conversationHistory.push({ role: "assistant", content: data.response });
+//    } else {
+//     addMessage("assistant", `⚠️ خطأ: ${data.error || "فشل الاتصال بالسيرفر."}`);
       }
     } catch (error) {
       stopLoader();
