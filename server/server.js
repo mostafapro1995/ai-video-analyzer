@@ -25,12 +25,13 @@ app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // 🟢 إضافة دعم للملفات الثابتة من فولدر client
-app.use(express.static(path.join(__dirname, "../client")));
+app.use(express.static(path.resolve(__dirname, "../client")));
 
 // لو المستخدم دخل على الرابط الأساسي → نعرض صفحة الواجهة
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/index.html"));
+  res.sendFile(path.resolve(__dirname, "../client/index.html"));
 });
 
 // فحص حالة السيرفر
