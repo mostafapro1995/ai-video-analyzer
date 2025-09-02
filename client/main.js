@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadVideo = document.getElementById("uploadVideo");
   const uploadAudio = document.getElementById("uploadAudio");
   const screenShareBtn = document.getElementById("shareScreen");
+ const API_URL = "https://ai-video-analyzer-4mmd.onrender.com";
 
   // === المصفوفة لحفظ سياق المحادثة ===
   let conversationHistory = [];
@@ -48,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const stopLoader = attachLoader(assistMsg);
 
     try {
-      const response = await fetch("https://ai-video-analyzer-4mmd.onrender.com/chat", {
+      const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
@@ -89,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append(type, file);
 
     try {
-      const res = await fetch(`https://ai-video-analyzer-4mmd.onrender.com/upload-${type}`, {
+      const res = await fetch(`${API_URL}/upload-${type}`, {
         method: "POST",
         body: formData,
       });
