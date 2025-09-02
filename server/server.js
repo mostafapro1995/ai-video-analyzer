@@ -18,15 +18,15 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🟢 إضافة دعم للملفات الثابتة من فولدر client
-app.use(express.static(path.join(__dirname, "../client")));
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// 🟢 إضافة دعم للملفات الثابتة من فولدر client
+app.use(express.static(path.join(__dirname, "../client")));
 
 // لو المستخدم دخل على الرابط الأساسي → نعرض صفحة الواجهة
 app.get("/", (req, res) => {
