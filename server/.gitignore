@@ -1,5 +1,4 @@
 node_modules
+server/uploads
+server/frames
 .env
-uploads
-frames
-*.log
