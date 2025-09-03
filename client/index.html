@@ -37,13 +37,35 @@
     /* ---- منطقة الشات ---- */
     #chat {
       flex:1;
-      padding:18px;
+      padding:14px;
       overflow-y:auto;
       display:flex;
       flex-direction:column;
       gap:12px;
-      min-height: calc(100vh - 140px);
+      min-height: calc(100vh - 230px);
     }
+    /* لو حجم الشاشة صغير جدًا (موبايل) */
+@media (max-width: 768px) {
+  #chat {
+    min-height: calc(100vh - 280px); /* نقلل أكتر المساحة عشان الأزرار تبان */
+    padding-bottom: 8px; /* شوية فراغ بسيط أسفل الشات */
+  }
+
+  #input-area {
+    flex-wrap: wrap;  /* نخلي الأزرار تكمل تحت لو الشاشة ضيقة */
+    justify-content: center;
+    gap: 8px;
+  }
+
+  #input {
+    flex: 1 1 100%; /* خلي حقل الكتابة ياخد سطر كامل */
+    margin-bottom: 6px;
+  }
+
+  .file-label, .btn {
+    flex: 1 1 auto; /* نخلي الأزرار تتوزع بشكل أحسن */
+  }
+}
     .container{
       display:flex;
       flex-direction:column;
