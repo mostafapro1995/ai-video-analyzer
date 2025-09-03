@@ -68,13 +68,15 @@
       background:#0b0c0d;
       padding:12px;
       display:flex;
+      flex-wrap: wrap; /* ✅ السماح بلف الأزرار تلقائياً */
       gap:10px;
       align-items:center;
+      justify-content:flex-start;
       border-top:1px solid rgba(255,255,255,.03);
       box-shadow:0 -6px 20px rgba(0,0,0,.6);
     }
     #input{
-      flex:1;
+      flex:1 1 180px; /* ✅ متجاوب مع مختلف الشاشات */
       padding:12px 14px;
       border-radius:10px;
       border:none;
@@ -82,6 +84,7 @@
       background:#121316;
       color:var(--text);
       font-size:1rem;
+      min-width: 140px;
     }
     .btn{
       background:var(--btn);
@@ -94,6 +97,7 @@
       align-items:center;
       gap:8px;
       font-weight:600;
+      white-space: nowrap;
     }
     .file-label{
       display:inline-flex;
@@ -105,6 +109,7 @@
       background:var(--btn);
       color:#fff;
       font-weight:600;
+      white-space: nowrap;
     }
     .file-label input{display:none}
 
@@ -133,6 +138,29 @@
     @keyframes loaderBounce {
       0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; }
       40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ✅ تحسين التصميم على الموبايل والتابلت */
+    @media (max-width: 768px) {
+      #input-area {
+        justify-content: center;
+      }
+      #input {
+        flex: 1 1 100%;
+      }
+      .btn,
+      .file-label {
+        flex: 1 1 45%;
+        justify-content: center;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .btn,
+      .file-label {
+        flex: 1 1 100%;
+      }
     }
   </style>
 </head>
@@ -164,11 +192,11 @@
         <i class="fa-solid fa-wave-square"></i>&nbsp;<span>صوت</span>
         <input id="uploadAudio" type="file" accept="audio/*" />
       </label>
-<label class="file-label" title="مشاركة الشاشة">
-  <i class="fa-solid fa-desktop"></i>&nbsp;<span>مشاركة الشاشة</span>
-  <input id="shareScreen" type="button" />
-</label>
 
+      <label class="file-label" title="مشاركة الشاشة">
+        <i class="fa-solid fa-desktop"></i>&nbsp;<span>مشاركة الشاشة</span>
+        <input id="shareScreen" type="button" />
+      </label>
     </div>
   </div>
 
