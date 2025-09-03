@@ -299,7 +299,7 @@ app.post('/upload-image', upload.single('image'), async (req, res) => {
   }
 });
 
-// رفع فيديو → بدء التحليل في الخلفية
+// رفع فيديو → بدء التحليل
 app.post('/upload-video', upload.single('video'), async (req, res) => {
   const videoPath = req.file?.path;
   const prompt = req.body?.prompt || '';
@@ -308,43 +308,39 @@ app.post('/upload-video', upload.single('video'), async (req, res) => {
     return res.status(400).json({ ok: false, error: 'لم يتم رفع الفيديو' });
   }
 
-  const taskId = Date.now().toString();
+  let audioPath;
+  try {
+    // استخراج الفريمات + تايملاين تقريبي
+    console.log("📌 بدء استخراج الفريمات...");
+    const { frames, framesMeta, duration } = await extractSmartFramesWithMeta(videoPath);
+    console.log("✅ تم استخراج الفريمات:", frames.length);
 
-	//res.json({ ok: true, processing: true, taskId }); // نرد فورًا
-	
-	    // رجع الرد النهائي للواجهة مباشرة
-	return res.json({ok: true, response: botResponse, extra: {frames, transcript,frames_meta: framesMeta,duration,audio: audioDetails} });
+    // تحليل بصري تفصيلي للفريمات
+    console.log("📌 بدء تحليل الفريمات...");
+    const vision = await visionDescribeLocal(frames, prompt);
+    console.log("✅ تم تحليل الفريمات");
 
-  // نبدأ المعالجة في الخلفية
-  (async () => {
-    let audioPath;
+    // محاولة استخراج الصوت (إن وجد)
+    console.log("📌 بدء استخراج الصوت...");
+    let transcript = '';
+    let audioDetails = null;
     try {
-      // استخراج الفريمات + تايملاين تقريبي
-      const { frames, framesMeta, duration } = await extractSmartFramesWithMeta(videoPath);
+      audioPath = path.join(UPLOAD_DIR, `${Date.now()}-audio.mp3`);
+      await extractAudio(videoPath, audioPath);
+      const t = await transcribeWithAssemblyAI(audioPath);
+      transcript = t.text || '';
+      audioDetails = t;
+    } catch {
+      transcript = '';
+      audioDetails = null;
+    }
 
-      // تحليل بصري تفصيلي للفريمات
-      const vision = await visionDescribeLocal(frames, prompt);
+    // إعداد التقرير النهائي
+    const framesLines = framesMeta.map((m, i) =>
+      `- فريم #${i + 1} عند ~${m.t.toFixed(1)} ثانية`
+    ).join('\n');
 
-      // محاولة استخراج الصوت (إن وجد)
-      let transcript = '';
-      let audioDetails = null;
-      try {
-        audioPath = path.join(UPLOAD_DIR, `${Date.now()}-audio.mp3`);
-        await extractAudio(videoPath, audioPath);
-        const t = await transcribeWithAssemblyAI(audioPath);
-        transcript = t.text || '';
-        audioDetails = t;
-      } catch {
-        transcript = '';
-        audioDetails = null;
-      }
-
-      // إعداد التقرير النهائي
-      const framesLines = framesMeta.map((m, i) =>
-        `- فريم #${i + 1} عند ~${m.t.toFixed(1)} ثانية`
-      ).join('\n');
-
-      const finalPrompt = `
+    const finalPrompt = `
 لديك تحليل بصري من لقطات موزّعة زمنيًا + نص صوتي (إن وُجد). اكتب **تقريرًا تفصيليًا** بالعربية بتقسيمات واضحة:
 
 1) ملخص تنفيذي (2–4 جُمل).
@@ -363,38 +359,41 @@ ${vision}
 
 النص الصوتي المستخرج (قد يكون فارغًا):
 ${transcript || '(لا يوجد صوت/تم تخطيه)'}
-      `.trim();
+    `.trim();
 
-      const reply = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [...conversationHistory, { role: 'user', content: finalPrompt }],
-        temperature: 0.25
-      });
+    // طلب إلى GPT للحصول على الرد النهائي
+    console.log("📌 إرسال البيانات إلى GPT...");
+    const reply = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [...conversationHistory, { role: 'user', content: finalPrompt }],
+      temperature: 0.25
+    });
 
-      const botResponse = reply.choices[0].message.content.trim();
-      conversationHistory.push({ role: 'assistant', content: botResponse });
-      trimHistory();
+    const botResponse = reply.choices[0].message.content.trim();
+    conversationHistory.push({ role: 'assistant', content: botResponse });
+    trimHistory();
 
-      // نخزن النتيجة مؤقتًا
-      tasks[taskId] = {
-        ok: true,
-        response: botResponse,
-        extra: {
-          frames,
-          transcript,
-          frames_meta: framesMeta,
-          duration,
-          audio: audioDetails
-        }
-      };
-    } catch (err) {
-      tasks[taskId] = { ok: false, error: err.message };
-    } finally {
-      await cleanDir(FRAMES_DIR).catch(() => {});
-      if (audioPath) fsp.unlink(audioPath).catch(() => {});
-      if (videoPath) fsp.unlink(videoPath).catch(() => {});
-    }
-  })();
+    // رجع الرد النهائي للواجهة
+    res.json({
+      ok: true,
+      response: botResponse,
+      extra: {
+        frames,
+        transcript,
+        frames_meta: framesMeta,
+        duration,
+        audio: audioDetails
+      }
+    });
+
+  } catch (err) {
+    console.error("❌ خطأ أثناء المعالجة:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  } finally {
+    await cleanDir(FRAMES_DIR).catch(() => {});
+    if (audioPath) fsp.unlink(audioPath).catch(() => {});
+    if (videoPath) fsp.unlink(videoPath).catch(() => {});
+  }
 });
 
 // API لاسترجاع النتيجة بعد التحليل
